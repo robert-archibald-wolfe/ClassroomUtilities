@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Button, Group, NumberInput, SegmentedControl, RingProgress, Text, Center, Stack } from '@mantine/core';
 
 type TimerMode = 'countdown' | 'stopwatch';
 
@@ -15,7 +16,7 @@ export default function TimerPage() {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes default
   const [initialTime, setInitialTime] = useState(300);
   const [isRunning, setIsRunning] = useState(false);
-  const [customMinutes, setCustomMinutes] = useState('5');
+  const [customMinutes, setCustomMinutes] = useState<string | number>(5);
 
   // Timer logic
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function TimerPage() {
   };
 
   const handleCustomTime = () => {
-    const minutes = parseInt(customMinutes, 10);
+    const minutes = typeof customMinutes === 'number' ? customMinutes : parseInt(customMinutes, 10);
     if (!isNaN(minutes) && minutes > 0) {
       const seconds = minutes * 60;
       setInitialTime(seconds);
@@ -104,150 +105,113 @@ export default function TimerPage() {
       : 0;
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
-      {/* Mode toggle */}
-      <div className="mb-8 flex gap-2">
-        <button
-          onClick={() => {
-            setMode('countdown');
-            setTimeLeft(initialTime);
-            setIsRunning(false);
-          }}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            mode === 'countdown'
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
-        >
-          Countdown
-        </button>
-        <button
-          onClick={() => {
-            setMode('stopwatch');
-            setTimeLeft(0);
-            setIsRunning(false);
-          }}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            mode === 'stopwatch'
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
-        >
-          Stopwatch
-        </button>
-      </div>
+    <div style={{ minHeight: '100vh', background: '#1a1b1e', padding: '2rem' }}>
+      <Center>
+        <Stack gap="xl" align="center">
+          {/* Mode toggle */}
+          <SegmentedControl
+            value={mode}
+            onChange={(value) => {
+              const newMode = value as TimerMode;
+              setMode(newMode);
+              setTimeLeft(newMode === 'countdown' ? initialTime : 0);
+              setIsRunning(false);
+            }}
+            data={[
+              { label: 'Countdown', value: 'countdown' },
+              { label: 'Stopwatch', value: 'stopwatch' },
+            ]}
+            size="lg"
+          />
 
-      {/* Timer display */}
-      <div className="relative mb-8">
-        {/* Progress ring (countdown only) */}
-        {mode === 'countdown' && (
-          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 200 200">
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              fill="none"
-              stroke="#374151"
-              strokeWidth="8"
-            />
-            <circle
-              cx="100"
-              cy="100"
-              r="90"
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 90}`}
-              strokeDashoffset={`${2 * Math.PI * 90 * (1 - progress / 100)}`}
-              className="transition-all duration-1000"
-            />
-          </svg>
-        )}
-
-        {/* Time display */}
-        <div className="w-48 h-48 flex items-center justify-center">
-          <span
-            className={`text-6xl font-mono font-bold ${
-              timeLeft === 0 && mode === 'countdown'
-                ? 'text-red-500 animate-pulse'
-                : 'text-white'
-            }`}
-          >
-            {formatTime(timeLeft)}
-          </span>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex gap-4 mb-8">
-        {!isRunning ? (
-          <button
-            onClick={handleStart}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-          >
-            Start
-          </button>
-        ) : (
-          <button
-            onClick={handlePause}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-          >
-            Pause
-          </button>
-        )}
-        <button
-          onClick={handleReset}
-          className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
-        >
-          Reset
-        </button>
-      </div>
-
-      {/* Presets (countdown mode) */}
-      {mode === 'countdown' && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.seconds}
-                onClick={() => handlePreset(preset.seconds)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  initialTime === preset.seconds
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                {preset.label}
-              </button>
-            ))}
+          {/* Timer display */}
+          <div style={{ position: 'relative', width: 300, height: 300 }}>
+            {mode === 'countdown' ? (
+              <Center style={{ width: '100%', height: '100%' }}>
+                <RingProgress
+                  size={300}
+                  thickness={16}
+                  sections={[{ value: progress, color: timeLeft === 0 ? 'red' : 'blue' }]}
+                  label={
+                    <Center>
+                      <Text
+                        size="4rem"
+                        fw={700}
+                        c={timeLeft === 0 ? 'red' : 'white'}
+                        style={{ fontFamily: 'monospace' }}
+                      >
+                        {formatTime(timeLeft)}
+                      </Text>
+                    </Center>
+                  }
+                />
+              </Center>
+            ) : (
+              <Center style={{ width: '100%', height: '100%' }}>
+                <Text
+                  size="4rem"
+                  fw={700}
+                  c="white"
+                  style={{ fontFamily: 'monospace' }}
+                >
+                  {formatTime(timeLeft)}
+                </Text>
+              </Center>
+            )}
           </div>
 
-          {/* Custom time */}
-          <div className="flex items-center gap-2 justify-center">
-            <input
-              type="number"
-              value={customMinutes}
-              onChange={(e) => setCustomMinutes(e.target.value)}
-              className="w-20 px-3 py-2 bg-gray-700 text-white rounded-lg text-center"
-              min="1"
-              max="999"
-            />
-            <span className="text-gray-400">minutes</span>
-            <button
-              onClick={handleCustomTime}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Set
-            </button>
-          </div>
-        </div>
-      )}
+          {/* Controls */}
+          <Group gap="md">
+            {!isRunning ? (
+              <Button onClick={handleStart} size="xl" color="green">
+                Start
+              </Button>
+            ) : (
+              <Button onClick={handlePause} size="xl" color="yellow">
+                Pause
+              </Button>
+            )}
+            <Button onClick={handleReset} size="xl" color="gray">
+              Reset
+            </Button>
+          </Group>
 
-      {/* Fullscreen hint */}
-      <p className="mt-8 text-gray-500 text-sm">
-        Press F11 for fullscreen
-      </p>
+          {/* Presets (countdown mode) */}
+          {mode === 'countdown' && (
+            <Stack gap="md" align="center">
+              <Group gap="xs">
+                {PRESETS.map((preset) => (
+                  <Button
+                    key={preset.seconds}
+                    onClick={() => handlePreset(preset.seconds)}
+                    variant={initialTime === preset.seconds ? 'filled' : 'default'}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </Group>
+
+              {/* Custom time */}
+              <Group gap="xs">
+                <NumberInput
+                  value={customMinutes}
+                  onChange={setCustomMinutes}
+                  min={1}
+                  max={999}
+                  style={{ width: 100 }}
+                />
+                <Text c="dimmed">minutes</Text>
+                <Button onClick={handleCustomTime}>Set</Button>
+              </Group>
+            </Stack>
+          )}
+
+          {/* Fullscreen hint */}
+          <Text c="dimmed" size="sm">
+            Press F11 for fullscreen
+          </Text>
+        </Stack>
+      </Center>
     </div>
   );
 }

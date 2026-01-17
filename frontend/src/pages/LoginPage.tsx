@@ -1,5 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Paper,
+  Title,
+  Text,
+  Container,
+  Alert,
+  Anchor,
+  Stack,
+} from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useAuthStore } from '../stores/authStore';
 import { authApi } from '../api/client';
 import { cryptoManager } from '../crypto';
@@ -34,6 +47,13 @@ export default function LoginPage() {
       // Set auth state
       setAuth(user, tokens.access_token, tokens.refresh_token);
 
+      // Show success notification
+      notifications.show({
+        title: 'Success',
+        message: isLogin ? 'Welcome back!' : 'Account created successfully!',
+        color: 'green',
+      });
+
       // Navigate to dashboard
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -48,96 +68,78 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-primary-600">
-            Teacher Tools
-          </Link>
-          <h2 className="mt-4 text-xl text-gray-900">
-            {isLogin ? 'Sign in to your account' : 'Create your account'}
-          </h2>
-        </div>
+    <Container size={420} my={40}>
+      <Title ta="center" mb="md">
+        <Anchor component={Link} to="/" c="blue" underline="never">
+          Teacher Tools
+        </Anchor>
+      </Title>
 
-        <div className="card">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+      <Text c="dimmed" size="sm" ta="center" mt={5} mb="xl">
+        {isLogin ? 'Sign in to your account' : 'Create your account'}
+      </Text>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <Paper withBorder shadow="md" p={30} radius="md">
+        {error && (
+          <Alert color="red" mb="md" title="Error">
+            {error}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <Stack gap="md">
             {!isLogin && (
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="input"
-                  required={!isLogin}
-                />
-              </div>
+              <TextInput
+                label="Name"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.currentTarget.value)}
+                required={!isLogin}
+              />
             )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input"
-                required
-              />
-            </div>
+            <TextInput
+              label="Email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.currentTarget.value)}
+              required
+              type="email"
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input"
-                required
-                minLength={8}
-              />
-              {!isLogin && (
-                <p className="mt-1 text-xs text-gray-500">
-                  Your password is used to encrypt student data. If you forget it, your data cannot be recovered.
-                </p>
-              )}
-            </div>
+            <PasswordInput
+              label="Password"
+              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.currentTarget.value)}
+              required
+              minLength={8}
+              description={
+                !isLogin
+                  ? 'Your password is used to encrypt student data. If you forget it, your data cannot be recovered.'
+                  : undefined
+              }
+            />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full"
-            >
-              {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
-            </button>
-          </form>
+            <Button type="submit" fullWidth mt="md" loading={loading}>
+              {isLogin ? 'Sign In' : 'Create Account'}
+            </Button>
+          </Stack>
+        </form>
 
-          <div className="mt-4 text-center text-sm">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-primary-600 hover:text-primary-700"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        <Text c="dimmed" size="sm" ta="center" mt="md">
+          <Anchor
+            component="button"
+            type="button"
+            c="blue"
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin
+              ? "Don't have an account? Sign up"
+              : 'Already have an account? Sign in'}
+          </Anchor>
+        </Text>
+      </Paper>
+    </Container>
   );
 }

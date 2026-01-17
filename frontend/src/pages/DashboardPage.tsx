@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Title, SimpleGrid, Paper, Text, Badge, Group } from '@mantine/core';
 import { useAuthStore } from '../stores/authStore';
 
 export default function DashboardPage() {
@@ -6,12 +7,12 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+      <Title order={1} mb="xl">
         Welcome back, {user?.name || 'Teacher'}!
-      </h1>
+      </Title>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
         <QuickAction
           to="/rosters"
           title="Rosters"
@@ -51,19 +52,19 @@ export default function DashboardPage() {
           icon="📊"
           badge="AI"
         />
-      </div>
+      </SimpleGrid>
 
       {/* Recent activity placeholder */}
-      <div className="mt-10">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div style={{ marginTop: 60 }}>
+        <Title order={2} size="h3" mb="md">
           Recent Activity
-        </h2>
-        <div className="card text-center text-gray-500 py-8">
-          <p>No recent activity yet.</p>
-          <p className="text-sm mt-2">
+        </Title>
+        <Paper withBorder p="xl" style={{ textAlign: 'center' }}>
+          <Text c="dimmed">No recent activity yet.</Text>
+          <Text size="sm" c="dimmed" mt="xs">
             Get started by creating a roster or generating a lesson plan!
-          </p>
-        </div>
+          </Text>
+        </Paper>
       </div>
     </div>
   );
@@ -83,20 +84,41 @@ function QuickAction({
   badge?: string;
 }) {
   return (
-    <Link
+    <Paper
+      component={Link}
       to={to}
-      className="card hover:shadow-md transition-shadow relative group"
+      withBorder
+      p="lg"
+      radius="md"
+      style={{
+        textDecoration: 'none',
+        transition: 'box-shadow 0.2s',
+        position: 'relative',
+      }}
+      className="hover-card"
     >
       {badge && (
-        <span className="absolute top-3 right-3 bg-primary-100 text-primary-700 text-xs font-medium px-2 py-0.5 rounded">
+        <Badge
+          variant="light"
+          color="blue"
+          style={{ position: 'absolute', top: 12, right: 12 }}
+        >
           {badge}
-        </span>
+        </Badge>
       )}
-      <div className="text-3xl mb-3">{icon}</div>
-      <h3 className="font-semibold text-gray-900 group-hover:text-primary-600">
-        {title}
-      </h3>
-      <p className="text-sm text-gray-600 mt-1">{description}</p>
-    </Link>
+      <Group gap="md" align="flex-start">
+        <Text size="xl" style={{ fontSize: '2rem' }}>
+          {icon}
+        </Text>
+        <div>
+          <Text fw={600} size="lg">
+            {title}
+          </Text>
+          <Text size="sm" c="dimmed" mt={4}>
+            {description}
+          </Text>
+        </div>
+      </Group>
+    </Paper>
   );
 }
